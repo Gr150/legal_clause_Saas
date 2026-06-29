@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claura — Contract Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --sidebar-bg:  #12202F;
+  --sidebar-w:   224px;
+  --bg:          #F4F3EF;
+  --surface:     #FFFFFF;
+  --border:      #EAE8E1;
+  --primary:     #C84A1A;
+  --primary-h:   #A83A10;
+  --navy:        #12202F;
+  --muted:       #6B7280;
+  --danger:      #DC2626;
+  --danger-bg:   #FEF2F2;
+  --warning:     #D97706;
+  --warning-bg:  #FFFBEB;
+  --success:     #16A34A;
+  --success-bg:  #F0FDF4;
+  --serif:       'Source Serif 4', Georgia, serif;
+  --sans:        'Inter', system-ui, sans-serif;
+  --mono:        'JetBrains Mono', monospace;
+  --radius:      6px;
+  --radius-lg:   10px;
+}
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--navy);
+  display: flex;
+  min-height: 100vh;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── SIDEBAR ──────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0;
+  height: 100vh;
+  z-index: 100;
+}
+
+.sidebar-logo { padding: 20px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.sidebar-logo a { font-family: var(--mono); font-size: 16px; font-weight: 500; color: var(--primary); text-decoration: none; }
+
+.sidebar-user { padding: 14px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 10px; }
+.user-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 12px; font-weight: 500; color: #fff; flex-shrink: 0; }
+.user-name { font-size: 12px; font-weight: 500; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-plan { font-family: var(--mono); font-size: 10px; color: rgba(255,255,255,0.4); letter-spacing: 0.04em; }
+
+.sidebar-nav { flex: 1; padding: 12px 0; }
+.nav-section-label { font-family: var(--mono); font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 10px 20px 4px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 20px; font-size: 13px; color: rgba(255,255,255,0.65); cursor: pointer; transition: all 0.15s; text-decoration: none; border-left: 2px solid transparent; }
+.nav-item:hover { color: #fff; background: rgba(255,255,255,0.06); }
+.nav-item.active { color: #fff; background: rgba(200,74,26,0.18); border-left-color: var(--primary); font-weight: 500; }
+.nav-icon { font-size: 14px; width: 16px; text-align: center; flex-shrink: 0; }
+
+.sidebar-footer { padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.08); }
+
+/* ── MAIN ─────────────────────────────────────────── */
+.main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+
+.topbar { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 28px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+.back-btn { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 12px; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+.back-btn:hover { color: var(--navy); }
+.topbar-title { font-family: var(--serif); font-size: 18px; font-weight: 600; color: var(--navy); letter-spacing: -0.01em; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+
+.btn-export { display: flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 14px; font-family: var(--mono); font-size: 12px; color: var(--navy); cursor: pointer; transition: border-color 0.15s; }
+.btn-export:hover { border-color: var(--navy); }
+
+.content { padding: 24px 28px; flex: 1; }
+
+/* ── VERDICT CARD ─────────────────────────────────── */
+.verdict-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.verdict-left { flex: 1; }
+.verdict-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  padding: 6px 14px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+.verdict-badge.danger  { background: var(--danger-bg); color: var(--danger); }
+.verdict-badge.caution { background: var(--warning-bg); color: var(--warning); }
+.verdict-badge.safe    { background: var(--success-bg); color: var(--success); }
+
+.verdict-filename { font-family: var(--serif); font-size: 20px; font-weight: 600; color: var(--navy); margin-bottom: 4px; }
+.verdict-meta { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.03em; }
+
+.verdict-stats {
+  display: flex;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+.vstat { text-align: center; }
+.vstat-num { font-family: var(--serif); font-size: 28px; font-weight: 600; line-height: 1; }
+.vstat-num.danger  { color: var(--danger); }
+.vstat-num.warning { color: var(--warning); }
+.vstat-num.success { color: var(--success); }
+.vstat-label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.05em; margin-top: 4px; }
+
+/* ── FILTER BAR ───────────────────────────────────── */
+.filter-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.filter-btn {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  color: var(--muted);
+  transition: all 0.15s;
+  letter-spacing: 0.04em;
+}
+
+.filter-btn:hover { border-color: var(--navy); color: var(--navy); }
+.filter-btn.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+.filter-btn.danger.active  { background: var(--danger);  border-color: var(--danger); }
+.filter-btn.warning.active { background: var(--warning); border-color: var(--warning); }
+.filter-btn.success.active { background: var(--success); border-color: var(--success); }
+
+/* ── CLAUSE CARD ──────────────────────────────────── */
+.clause-list { display: flex; flex-direction: column; gap: 10px; }
+
+.clause-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+}
+
+.clause-card:hover { box-shadow: 0 2px 8px rgba(18,32,47,0.08); }
+
+.clause-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.risk-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  padding: 3px 9px;
+  border-radius: 4px;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+}
+.risk-badge.High   { background: var(--danger-bg);  color: var(--danger); }
+.risk-badge.Medium { background: var(--warning-bg); color: var(--warning); }
+.risk-badge.Low    { background: var(--success-bg); color: var(--success); }
+
+.clause-type { font-size: 13px; font-weight: 600; color: var(--navy); flex: 1; }
+.clause-summary { font-size: 12px; color: var(--muted); flex: 2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.clause-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+.hitl-btn {
+  width: 28px; height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  transition: all 0.15s;
+  color: var(--muted);
+}
+.hitl-btn:hover { border-color: var(--navy); color: var(--navy); }
+.hitl-btn.voted-up   { background: var(--success-bg); border-color: var(--success); color: var(--success); }
+.hitl-btn.voted-down { background: var(--danger-bg);  border-color: var(--danger);  color: var(--danger); }
+
+.expand-icon { font-size: 12px; color: var(--muted); transition: transform 0.2s; flex-shrink: 0; }
+.clause-card.open .expand-icon { transform: rotate(180deg); }
+
+/* ── CLAUSE BODY ──────────────────────────────────── */
+.clause-body {
+  display: none;
+  padding: 0 18px 18px;
+  border-top: 1px solid var(--border);
+}
+
+.clause-card.open .clause-body { display: block; }
+
+.clause-section { margin-top: 14px; }
+.clause-section-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.clause-text-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  font-size: 12px;
+  color: var(--navy);
+  line-height: 1.7;
+  font-style: italic;
+}
+
+.reason-text { font-size: 13px; color: var(--navy); line-height: 1.6; }
+
+.wording-box {
+  background: #F0F9FF;
+  border: 1px solid #BAE6FD;
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  position: relative;
+}
+
+.wording-text { font-size: 12px; color: #0C4A6E; line-height: 1.7; }
+
+.copy-btn {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 5px 12px;
+  border-radius: var(--radius);
+  border: 1px solid #BAE6FD;
+  background: #fff;
+  color: #0369A1;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.04em;
+}
+.copy-btn:hover { background: #0369A1; color: #fff; border-color: #0369A1; }
+.copy-btn.copied { background: var(--success-bg); color: var(--success); border-color: var(--success); }
+
+/* ── LOADING ──────────────────────────────────────── */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 16px;
+}
+
+.spinner-lg {
+  width: 36px; height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-text { font-family: var(--mono); font-size: 13px; color: var(--muted); letter-spacing: 0.04em; }
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ──────────────────────────────────────── -->
+<aside class="sidebar">
+  <div class="sidebar-logo"><a href="/dashboard.html">claura.</a></div>
+  <div class="sidebar-user">
+    <div class="user-avatar" id="sidebar-avatar">--</div>
+    <div>
+      <div class="user-name" id="sidebar-company">Loading…</div>
+      <div class="user-plan">FREE TRIAL</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Workspace</div>
+    <a class="nav-item" href="/dashboard.html"><span class="nav-icon">⊞</span> Dashboard</a>
+    <a class="nav-item active" href="#"><span class="nav-icon">📄</span> My Contracts</a>
+    <a class="nav-item" href="#"><span class="nav-icon">⚠</span> Risk Flags</a>
+    <div class="nav-section-label" style="margin-top:8px">Analysis</div>
+    <a class="nav-item" href="#"><span class="nav-icon">🔍</span> Contract Review</a>
+    <a class="nav-item" href="#"><span class="nav-icon">✏</span> Negotiation Wording</a>
+  </nav>
+  <div class="sidebar-footer">
+    <a class="nav-item" id="logout-btn" href="#"><span class="nav-icon">←</span> Log out</a>
+  </div>
+</aside>
+
+<!-- ── MAIN ────────────────────────────────────────── -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <a class="back-btn" href="/dashboard.html">← Dashboard</a>
+      <div class="topbar-title" id="topbar-title">Contract Analysis</div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-export" onclick="window.print()">↓ Export PDF</button>
+    </div>
+  </div>
+
+  <div class="content" id="content">
+    <div class="loading-state" id="loading">
+      <div class="spinner-lg"></div>
+      <div class="loading-text">Loading analysis…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API   = 'http://localhost:8000';
+const token = localStorage.getItem('claura_token');
+if (!token) { window.location.href = '/login.html'; }
+
+function authHeaders() {
+  return { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+}
+
+// Sidebar personalise
+const company = localStorage.getItem('claura_company') || '';
+const initials = company.split(/\s+/).map(w => w[0]).join('').slice(0,2).toUpperCase() || '--';
+document.getElementById('sidebar-avatar').textContent  = initials;
+document.getElementById('sidebar-company').textContent = company;
+document.getElementById('logout-btn').addEventListener('click', e => {
+  e.preventDefault(); localStorage.clear(); window.location.href = '/login.html';
+});
+
+// Get contract ID from URL
+const contractId = new URLSearchParams(window.location.search).get('id');
+if (!contractId) { window.location.href = '/dashboard.html'; }
+
+let allClauses = [];
+let currentFilter = 'all';
+
+async function loadResults() {
+  try {
+    const res  = await fetch(API + '/results/' + contractId, { headers: authHeaders() });
+    if (res.status === 401) { localStorage.clear(); window.location.href = '/login.html'; return; }
+    if (!res.ok) { throw new Error('Failed to load results'); }
+    const data = await res.json();
+    allClauses = data.clauses;
+    render(data);
+  } catch (err) {
+    document.getElementById('loading').innerHTML = `
+      <div style="text-align:center;color:var(--muted)">
+        <div style="font-size:32px;margin-bottom:12px">⚠</div>
+        <p style="font-family:var(--mono);font-size:13px">${err.message}</p>
+        <a href="/dashboard.html" style="color:var(--primary);font-size:12px;font-family:var(--mono)">← Back to dashboard</a>
+      </div>`;
+  }
+}
+
+function render(data) {
+  document.getElementById('topbar-title').textContent = data.filename;
+
+  const verdictClass = data.verdict === 'REVIEW BEFORE SIGNING' ? 'danger'
+                     : data.verdict === 'CAUTION — SEEK ADVICE'  ? 'caution'
+                     : 'safe';
+  const verdictIcon  = verdictClass === 'danger' ? '🔴' : verdictClass === 'caution' ? '🟡' : '🟢';
+
+  const content = document.getElementById('content');
+  content.innerHTML = `
+    <!-- Verdict card -->
+    <div class="verdict-card">
+      <div class="verdict-left">
+        <div class="verdict-badge ${verdictClass}">${verdictIcon} ${data.verdict}</div>
+        <div class="verdict-filename">${data.filename}</div>
+        <div class="verdict-meta">${data.contract_type} · ${data.total_clauses} clauses analysed</div>
+      </div>
+      <div class="verdict-stats">
+        <div class="vstat">
+          <div class="vstat-num danger">${data.high_risk}</div>
+          <div class="vstat-label">HIGH RISK</div>
+        </div>
+        <div class="vstat">
+          <div class="vstat-num warning">${data.medium_risk}</div>
+          <div class="vstat-label">MEDIUM</div>
+        </div>
+        <div class="vstat">
+          <div class="vstat-num success">${data.low_risk}</div>
+          <div class="vstat-label">LOW RISK</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">All (${data.total_clauses})</button>
+      <button class="filter-btn danger" data-filter="High">High Risk (${data.high_risk})</button>
+      <button class="filter-btn warning" data-filter="Medium">Medium (${data.medium_risk})</button>
+      <button class="filter-btn success" data-filter="Low">Low Risk (${data.low_risk})</button>
+    </div>
+
+    <!-- Clause list -->
+    <div class="clause-list" id="clause-list"></div>
+  `;
+
+  // Filter buttons
+  content.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      content.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      currentFilter = this.dataset.filter;
+      renderClauses();
+    });
+  });
+
+  renderClauses();
+}
+
+function renderClauses() {
+  const list = document.getElementById('clause-list');
+  const filtered = currentFilter === 'all'
+    ? allClauses
+    : allClauses.filter(c => c.risk_level === currentFilter);
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:12px">No clauses in this category</div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map((c, i) => {
+    const wording = c.wording
+      ? `<div class="clause-section">
+           <div class="clause-section-label">Suggested negotiation wording</div>
+           <div class="wording-box">
+             <div class="wording-text">${escHtml(c.wording)}</div>
+             <button class="copy-btn" data-text="${escAttr(c.wording)}">📋 Copy to clipboard</button>
+           </div>
+         </div>`
+      : '';
+
+    return `
+      <div class="clause-card" id="card-${c.clause_id}">
+        <div class="clause-header" onclick="toggleCard(${c.clause_id})">
+          <div class="risk-badge ${c.risk_level}">${c.risk_level.toUpperCase()}</div>
+          <div class="clause-type">${escHtml(c.clause_type)}</div>
+          <div class="clause-summary">${escHtml(c.summary)}</div>
+          <div class="clause-actions">
+            <button class="hitl-btn" title="This is correct" onclick="vote(event,${c.clause_id},'up')">👍</button>
+            <button class="hitl-btn" title="This is wrong" onclick="vote(event,${c.clause_id},'down')">👎</button>
+          </div>
+          <span class="expand-icon">▾</span>
+        </div>
+        <div class="clause-body">
+          <div class="clause-section">
+            <div class="clause-section-label">Plain English — what this means for you</div>
+            <div class="reason-text" style="font-weight:500;color:var(--navy);margin-bottom:4px">${escHtml(c.summary)}</div>
+          </div>
+          <div class="clause-section">
+            <div class="clause-section-label">Why it carries this risk</div>
+            <div class="reason-text">${escHtml(c.reason)}</div>
+          </div>
+          <div class="clause-section">
+            <div class="clause-section-label">Clause text</div>
+            <div class="clause-text-box">${escHtml(c.clause_text)}</div>
+          </div>
+          ${wording}
+        </div>
+      </div>`;
+  }).join('');
+
+  // Copy buttons
+  list.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      navigator.clipboard.writeText(btn.dataset.text).then(() => {
+        btn.textContent = '✓ Copied';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = '📋 Copy to clipboard'; btn.classList.remove('copied'); }, 2000);
+      });
+    });
+  });
+}
+
+function toggleCard(id) {
+  document.getElementById('card-' + id).classList.toggle('open');
+}
+
+async function vote(e, clauseId, direction) {
+  e.stopPropagation();
+  const card = document.getElementById('card-' + clauseId);
+  const [upBtn, downBtn] = card.querySelectorAll('.hitl-btn');
+
+  upBtn.classList.remove('voted-up');
+  downBtn.classList.remove('voted-down');
+
+  if (direction === 'up') {
+    upBtn.classList.add('voted-up');
+  } else {
+    downBtn.classList.add('voted-down');
+    // POST correction (minimal — just logs the thumbs down)
+    try {
+      await fetch(API + '/analyse/correct/' + clauseId, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ clause_id: clauseId })
+      });
+    } catch (_) {}
+  }
+}
+
+function escHtml(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(str) {
+  return (str || '').replace(/"/g, '&quot;');
+}
+
+loadResults();
+</script>
+</body>
+</html>

@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claura — Sign In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;500;600&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:           #F4F3EF;
+    --surface:      #FFFFFF;
+    --border:       #EAE8E1;
+    --border-focus: #C84A1A;
+    --primary:      #C84A1A;
+    --primary-h:    #A83A10;
+    --navy:         #12202F;
+    --navy-50:      rgba(18,32,47,0.5);
+    --navy-10:      rgba(18,32,47,0.1);
+    --muted:        #6B7280;
+    --serif:        'Source Serif 4', Georgia, serif;
+    --sans:         'Inter', system-ui, sans-serif;
+    --mono:         'JetBrains Mono', 'Fira Mono', monospace;
+    --radius-sm:    4px;
+    --radius:       6px;
+    --radius-lg:    8px;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--navy);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NAV ──────────────────────────────────────── */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    height: 56px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  .nav-logo {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--primary);
+    letter-spacing: -0.01em;
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--navy);
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    opacity: 0.75;
+    transition: opacity 0.15s;
+  }
+
+  .nav-links a:hover { opacity: 1; }
+
+  /* ── MAIN ─────────────────────────────────────── */
+  main {
+    min-height: calc(100vh - 56px - 52px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 20px;
+  }
+
+  /* ── HEADLINE ─────────────────────────────────── */
+  .headline {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .headline h1 {
+    font-family: var(--serif);
+    font-size: 40px;
+    font-weight: 600;
+    color: var(--navy);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+
+  .headline p {
+    font-family: var(--sans);
+    font-size: 16px;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  /* ── CARD ─────────────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    width: 100%;
+    max-width: 480px;
+  }
+
+  /* ── FORM ─────────────────────────────────────── */
+  .field {
+    margin-bottom: 22px;
+  }
+
+  .field-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 7px;
+  }
+
+  label {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--navy);
+    text-transform: uppercase;
+    display: block;
+  }
+
+  .forgot {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--primary);
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    transition: opacity 0.15s;
+  }
+
+  .forgot:hover { opacity: 0.75; }
+
+  input[type="email"],
+  input[type="password"] {
+    width: 100%;
+    height: 44px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0 14px;
+    font-family: var(--sans);
+    font-size: 15px;
+    color: var(--navy);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    -webkit-appearance: none;
+  }
+
+  input::placeholder {
+    color: var(--navy-50);
+    font-family: var(--sans);
+  }
+
+  input:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px var(--navy-10);
+  }
+
+  /* ── CHECKBOX ─────────────────────────────────── */
+  .check-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 28px;
+    cursor: pointer;
+  }
+
+  .check-row input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--navy);
+    border-radius: 3px;
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .check-row input[type="checkbox"]:checked {
+    background: var(--primary);
+    border-color: var(--primary);
+  }
+
+  .check-row input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 2px;
+    width: 5px;
+    height: 8px;
+    border: 2px solid #fff;
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg);
+  }
+
+  .check-row span {
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--navy);
+    user-select: none;
+  }
+
+  /* ── PRIMARY BUTTON ───────────────────────────── */
+  .btn-primary {
+    width: 100%;
+    height: 48px;
+    background: var(--primary);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.15s, box-shadow 0.15s;
+    margin-bottom: 28px;
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-h);
+  }
+
+  .btn-primary:active {
+    transform: translateY(1px);
+  }
+
+  .btn-arrow { font-size: 16px; }
+
+  /* ── DIVIDER ──────────────────────────────────── */
+  .or-divider {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .or-divider::before,
+  .or-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .or-divider span {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* ── SSO BUTTONS ──────────────────────────────── */
+  .sso-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .btn-sso {
+    height: 44px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--navy);
+    gap: 8px;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-sso:hover {
+    border-color: var(--navy);
+    box-shadow: 0 1px 4px var(--navy-10);
+  }
+
+  .sso-icon {
+    font-size: 16px;
+    opacity: 0.7;
+  }
+
+  /* ── SIGNUP LINK ──────────────────────────────── */
+  .signup-row {
+    text-align: center;
+    margin-top: 28px;
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .signup-row a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity 0.15s;
+  }
+
+  .signup-row a:hover { opacity: 0.75; }
+
+  /* ── TRUST BADGES ─────────────────────────────── */
+  .trust-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+  }
+
+  .trust-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+
+  .trust-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--muted);
+    opacity: 0.5;
+  }
+
+  /* ── FOOTER ───────────────────────────────────── */
+  footer {
+    height: 52px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    background: var(--bg);
+  }
+
+  .footer-logo {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--primary);
+    text-decoration: none;
+  }
+
+  .footer-copy {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 20px;
+    list-style: none;
+  }
+
+  .footer-links a {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--navy);
+    text-decoration: none;
+    opacity: 0.6;
+    letter-spacing: 0.02em;
+    transition: opacity 0.15s;
+  }
+
+  .footer-links a:hover { opacity: 1; }
+
+  /* ── ERROR STATE ──────────────────────────────── */
+  .field-error {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: #ba1a1a;
+    margin-top: 5px;
+    display: none;
+    letter-spacing: 0.02em;
+  }
+
+  input.has-error {
+    border-color: #ba1a1a;
+  }
+
+  /* ── LOADING STATE ────────────────────────────── */
+  .btn-primary.loading {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    display: none;
+  }
+
+  .btn-primary.loading .spinner { display: block; }
+  .btn-primary.loading .btn-text { opacity: 0.7; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── MOBILE ───────────────────────────────────── */
+  @media (max-width: 600px) {
+    nav { padding: 0 20px; }
+    .nav-links { gap: 16px; }
+    .headline h1 { font-size: 30px; }
+    .card { padding: 24px 20px; }
+    footer { padding: 0 20px; }
+    .footer-copy { display: none; }
+    .trust-row { gap: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">claura.</a>
+  <ul class="nav-links">
+    <li><a href="#">How it works</a></li>
+    <li><a href="#">Pricing</a></li>
+  </ul>
+</nav>
+
+<!-- MAIN -->
+<main>
+
+  <div class="headline">
+    <h1>Welcome back</h1>
+    <p>Access your contract dashboard</p>
+  </div>
+
+  <div class="card">
+    <form id="login-form" novalidate>
+
+      <div class="field">
+        <div class="field-header">
+          <label for="email">Email address</label>
+        </div>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          placeholder="name@company.com"
+          autocomplete="email"
+        >
+        <div class="field-error" id="email-error">Please enter a valid email address.</div>
+      </div>
+
+      <div class="field">
+        <div class="field-header">
+          <label for="password">Password</label>
+          <a href="#" class="forgot">Forgot Password?</a>
+        </div>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="••••••••"
+          autocomplete="current-password"
+        >
+        <div class="field-error" id="password-error">Please enter your password.</div>
+      </div>
+
+      <label class="check-row">
+        <input type="checkbox" name="remember">
+        <span>Remember Me</span>
+      </label>
+
+      <button type="submit" class="btn-primary" id="login-btn">
+        <div class="spinner"></div>
+        <span class="btn-text">Log In</span>
+        <span class="btn-arrow">→</span>
+      </button>
+
+      <div class="or-divider">
+        <span>or continue with</span>
+      </div>
+
+      <div class="sso-row">
+        <button type="button" class="btn-sso">
+          <span class="sso-icon">🔑</span>
+          SSO
+        </button>
+        <button type="button" class="btn-sso">
+          <span class="sso-icon">☁</span>
+          Microsoft
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <div class="signup-row">
+    Don't have an account? <a href="#" id="toggle-mode">Start free trial</a>
+  </div>
+
+  <div class="trust-row">
+    <div class="trust-item">
+      <div class="trust-dot"></div>
+      UK data residency
+    </div>
+    <div class="trust-item">
+      <div class="trust-dot"></div>
+      NEC4 &amp; JCT trained
+    </div>
+    <div class="trust-item">
+      <div class="trust-dot"></div>
+      UK GDPR compliant
+    </div>
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <a href="#" class="footer-logo">claura.</a>
+  <span class="footer-copy">© 2026 Claura Ltd. All rights reserved.</span>
+  <ul class="footer-links">
+    <li><a href="#">Privacy Policy</a></li>
+    <li><a href="#">Terms of Service</a></li>
+  </ul>
+</footer>
+
+<script>
+  const API = 'http://localhost:8000';
+
+  const form      = document.getElementById('login-form');
+  const btn       = document.getElementById('login-btn');
+  const emailEl   = document.getElementById('email');
+  const passEl    = document.getElementById('password');
+  const emailErr  = document.getElementById('email-error');
+  const passErr   = document.getElementById('password-error');
+  const headline  = document.querySelector('.headline h1');
+  const subline   = document.querySelector('.headline p');
+  const toggleEl  = document.getElementById('toggle-mode');
+  const btnText   = btn.querySelector('.btn-text');
+  const btnArrow  = btn.querySelector('.btn-arrow');
+
+  let isRegister = false;
+
+  // Company name field (added for register mode)
+  const companyField = document.createElement('div');
+  companyField.className = 'field';
+  companyField.style.display = 'none';
+  companyField.innerHTML = `
+    <div class="field-header"><label for="company">Company name</label></div>
+    <input type="text" id="company" name="company" placeholder="e.g. Reddy Civil Ltd" autocomplete="organization">
+    <div class="field-error" id="company-error">Please enter your company name.</div>
+  `;
+  form.insertBefore(companyField, form.querySelector('.field'));
+
+  toggleEl.addEventListener('click', e => {
+    e.preventDefault();
+    isRegister = !isRegister;
+    if (isRegister) {
+      headline.textContent = 'Start free trial';
+      subline.textContent = 'No credit card required';
+      companyField.style.display = 'block';
+      btnText.textContent = 'Create Account';
+      toggleEl.textContent = 'Already have an account? Log in';
+    } else {
+      headline.textContent = 'Welcome back';
+      subline.textContent = 'Access your contract dashboard';
+      companyField.style.display = 'none';
+      btnText.textContent = 'Log In';
+      toggleEl.textContent = 'Start free trial';
+    }
+  });
+
+  // Also hook the "Start free trial" link in toggle-mode
+  document.querySelector('.signup-row').querySelector('a').addEventListener('click', e => {
+    e.preventDefault();
+    toggleEl.click();
+  });
+
+  function showError(msg) {
+    emailEl.classList.add('has-error');
+    emailErr.textContent = msg;
+    emailErr.style.display = 'block';
+  }
+
+  function validate() {
+    let ok = true;
+    const emailVal   = emailEl.value.trim();
+    const passVal    = passEl.value;
+    const companyVal = document.getElementById('company')?.value.trim();
+
+    emailErr.style.display = 'none';
+    emailEl.classList.remove('has-error');
+    passErr.style.display  = 'none';
+    passEl.classList.remove('has-error');
+    document.getElementById('company-error').style.display = 'none';
+
+    if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+      emailEl.classList.add('has-error');
+      emailErr.textContent = 'Please enter a valid email address.';
+      emailErr.style.display = 'block';
+      ok = false;
+    }
+    if (!passVal || (isRegister && passVal.length < 8)) {
+      passEl.classList.add('has-error');
+      passErr.textContent = isRegister ? 'Password must be at least 8 characters.' : 'Please enter your password.';
+      passErr.style.display = 'block';
+      ok = false;
+    }
+    if (isRegister && (!companyVal || companyVal.length < 2)) {
+      const ce = document.getElementById('company-error');
+      document.getElementById('company').classList.add('has-error');
+      ce.style.display = 'block';
+      ok = false;
+    }
+    return ok;
+  }
+
+  [emailEl, passEl].forEach(el => {
+    el.addEventListener('input', () => {
+      el.classList.remove('has-error');
+      const errEl = document.getElementById(el.id + '-error');
+      if (errEl) errEl.style.display = 'none';
+    });
+  });
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    btn.classList.add('loading');
+    if (btnArrow) btnArrow.style.display = 'none';
+
+    try {
+      const endpoint = isRegister ? '/auth/register' : '/auth/login';
+      const body = isRegister
+        ? { email: emailEl.value.trim(), password: passEl.value, company_name: document.getElementById('company').value.trim() }
+        : { email: emailEl.value.trim(), password: passEl.value };
+
+      const res  = await fetch(API + endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showError(data.detail || 'Something went wrong. Please try again.');
+        return;
+      }
+
+      localStorage.setItem('claura_token', data.access_token);
+      localStorage.setItem('claura_user_id', data.user_id);
+      localStorage.setItem('claura_company', data.company_name);
+
+      btnText.textContent = isRegister ? 'Account created ✓' : 'Signed in ✓';
+      btn.style.background = '#166534';
+      setTimeout(() => { window.location.href = '/dashboard.html'; }, 600);
+
+    } catch (err) {
+      showError('Cannot reach server. Is the backend running?');
+    } finally {
+      btn.classList.remove('loading');
+      if (btnArrow) btnArrow.style.display = '';
+    }
+  });
+</script>
+
+</body>
+</html>

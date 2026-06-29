@@ -1,0 +1,44 @@
+# Environment
+.env
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# Node (if frontend tooling added later)
+node_modules/
+
+# Database
+*.db
+*.sqlite
+
+# Model weights (too large for GitHub)
+*.bin
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+
+# Uploads
+uploads/
+*.pdf
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+*.log
