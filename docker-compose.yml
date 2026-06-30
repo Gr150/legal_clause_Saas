@@ -13,16 +13,14 @@ services:
     volumes:
       - ./backend:/app
       - ./frontend:/frontend
-      - model_cache:/root/.cache/huggingface
+      - /home/guru/legal-risk-finetune:/home/guru/legal-risk-finetune:ro
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_started
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
+    network_mode: host
 
   db:
     image: postgres:16-alpine
@@ -50,4 +48,3 @@ services:
 volumes:
   postgres_data:
   redis_data:
-  model_cache:

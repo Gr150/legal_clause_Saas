@@ -5,8 +5,8 @@ Runs fine-tuned model on each clause and returns structured risk output.
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update
-from datetime import datetime, timezone
+from sqlalchemy import select
+from datetime import datetime
 
 from models.schemas import AnalyseResponse, ClauseResult, RiskLevel, CorrectionRequest
 from services.database import get_db, Contract, Clause, Correction
@@ -30,13 +30,8 @@ async def analyse_contract(
     db:           AsyncSession = Depends(get_db),
     current_user: dict         = Depends(get_current_user)
 ):
-    """
-    Run risk classification on all clauses of an uploaded contract.
-    Uses the fine-tuned Mistral 7B LoRA model.
-    """
     user_id = int(current_user["sub"])
 
-    # Verify contract belongs to user
     result   = await db.execute(
         select(Contract).where(Contract.id == contract_id, Contract.user_id == user_id)
     )
@@ -44,7 +39,6 @@ async def analyse_contract(
     if not contract:
         raise HTTPException(status_code=404, detail="Contract not found")
 
-    # Get clauses
     result  = await db.execute(
         select(Clause).where(Clause.contract_id == contract_id)
     )
@@ -53,7 +47,6 @@ async def analyse_contract(
     if not clauses:
         raise HTTPException(status_code=404, detail="No clauses found — upload the contract first")
 
-    # Run model on each clause
     results      = []
     high_count   = 0
     medium_count = 0
@@ -63,11 +56,10 @@ async def analyse_contract(
         prediction = classify_clause(clause.clause_text)
 
         risk = prediction.get("risk_level", "Medium")
-        if risk == "High":   high_count   += 1
+        if risk == "High":     high_count   += 1
         elif risk == "Medium": medium_count += 1
-        else:                low_count    += 1
+        else:                  low_count    += 1
 
-        # Update clause in DB
         clause.clause_type = prediction.get("clause_type", "Unknown")
         clause.risk_level  = risk
         clause.summary     = prediction.get("summary", "")
@@ -86,7 +78,6 @@ async def analyse_contract(
             wording=clause.wording
         ))
 
-    # Update contract summary
     verdict = _verdict(high_count, medium_count)
     contract.high_risk   = high_count
     contract.medium_risk = medium_count
@@ -115,10 +106,6 @@ async def correct_clause(
     db:           AsyncSession = Depends(get_db),
     current_user: dict         = Depends(get_current_user)
 ):
-    """
-    HITL — submit a correction on a clause.
-    Corrections are stored and feed future model retraining.
-    """
     user_id = int(current_user["sub"])
 
     result = await db.execute(select(Clause).where(Clause.id == clause_id))
