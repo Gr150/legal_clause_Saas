@@ -8,19 +8,25 @@ services:
       - DATABASE_URL=postgresql+asyncpg://claura:claura@db:5432/claura
       - REDIS_URL=redis://redis:6379
       - SECRET_KEY=change-this-in-production
-      - VLLM_URL=${VLLM_URL:-http://localhost:8001/v1/completions}
-      - VLLM_MODEL=${VLLM_MODEL:-legal-risk-classifier}
+      - BASE_MODEL_PATH=/home/guru/legal-risk-finetune/legal-risk-finetune/models/mistral-7b
+      - ADAPTER_MODEL_PATH=/home/guru/legal-risk-finetune/legal-risk-finetune/legal-risk-lora-adapters
     volumes:
       - ./backend:/app
       - ./frontend:/frontend
       - /home/guru/legal-risk-finetune:/home/guru/legal-risk-finetune:ro
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_started
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-    network_mode: host
 
   db:
     image: postgres:16-alpine

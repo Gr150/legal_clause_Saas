@@ -1,19 +1,32 @@
 """
 Claura — model.py
-Uses a local vLLM server (OpenAI-compatible) to run the fine-tuned Mistral 7B model.
-vLLM must be running on port 8001 before starting Claura.
+Loads fine-tuned Mistral 7B + LoRA from local DGX Spark paths.
+No API keys. No internet. Model already on disk.
+
+Base model path:    /home/guru/legal-risk-finetune/legal-risk-finetune/models/mistral-7b
+LoRA adapter path:  /home/guru/legal-risk-finetune/legal-risk-finetune/legal-risk-lora-adapters
 """
 
 import os
 import json
 import logging
-import requests
+import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+from peft import PeftModel
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
-VLLM_URL   = os.getenv("VLLM_URL",   "http://localhost:8001/v1/completions")
-VLLM_MODEL = os.getenv("VLLM_MODEL", "legal-risk-classifier")
-HEADERS    = {"Content-Type": "application/json"}
+BASE_MODEL    = os.getenv(
+    "BASE_MODEL_PATH",
+    "/home/guru/legal-risk-finetune/legal-risk-finetune/models/mistral-7b"
+)
+ADAPTER_MODEL = os.getenv(
+    "ADAPTER_MODEL_PATH",
+    "/home/guru/legal-risk-finetune/legal-risk-finetune/legal-risk-lora-adapters"
+)
+
+_pipe = None
 
 NEGOTIATION_WORDING = {
     "Indemnification": (
@@ -68,15 +81,37 @@ NEGOTIATION_WORDING = {
 
 
 def load_model():
-    """Check vLLM server is reachable on startup."""
-    try:
-        r = requests.get(VLLM_URL.replace("/v1/completions", "/health"), timeout=5)
-        if r.status_code == 200:
-            logger.info("vLLM server ready at %s", VLLM_URL)
-        else:
-            logger.warning("vLLM returned %s — falling back to keyword classifier", r.status_code)
-    except Exception as e:
-        logger.warning("vLLM not reachable (%s) — falling back to keyword classifier", e)
+    global _pipe
+    if _pipe is not None:
+        return
+
+    logger.info("Loading base model from: %s", BASE_MODEL)
+
+    tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, trust_remote_code=True)
+    tokenizer.pad_token = tokenizer.eos_token
+
+    base = AutoModelForCausalLM.from_pretrained(
+        BASE_MODEL,
+        torch_dtype=torch.bfloat16,
+        device_map="auto",
+        trust_remote_code=True
+    )
+
+    logger.info("Merging LoRA adapters from: %s", ADAPTER_MODEL)
+    model = PeftModel.from_pretrained(base, ADAPTER_MODEL)
+    model = model.merge_and_unload()
+
+    _pipe = pipeline(
+        "text-generation",
+        model=model,
+        tokenizer=tokenizer,
+        max_new_tokens=350,
+        temperature=0.1,
+        do_sample=False,
+        return_full_text=True
+    )
+
+    logger.info("Fine-tuned model ready — F1 0.887")
 
 
 def _build_prompt(clause_text: str) -> str:
@@ -98,13 +133,14 @@ def _build_prompt(clause_text: str) -> str:
     )
 
 
-def _parse(raw_text: str) -> dict | None:
+def _parse(raw: str, prompt: str) -> Optional[dict]:
+    response = raw[len(prompt):].strip()
     try:
-        start = raw_text.find("{")
-        end   = raw_text.rfind("}") + 1
+        start = response.find("{")
+        end   = response.rfind("}") + 1
         if start == -1 or end == 0:
             return None
-        return json.loads(raw_text[start:end])
+        return json.loads(response[start:end])
     except Exception:
         return None
 
@@ -141,33 +177,23 @@ def _fallback(text: str) -> dict:
 
 
 def classify_clause(clause_text: str) -> dict:
-    """Classify a single clause via local vLLM server."""
-    prompt = _build_prompt(clause_text)
-
-    try:
-        response = requests.post(
-            VLLM_URL,
-            headers=HEADERS,
-            json={
-                "model":       VLLM_MODEL,
-                "prompt":      prompt,
-                "max_tokens":  350,
-                "temperature": 0.1,
-            },
-            timeout=60
-        )
-        response.raise_for_status()
-        raw_text = response.json()["choices"][0]["text"]
-        result   = _parse(raw_text)
-        if result is None:
-            result = _fallback(clause_text)
-            result["confidence"] = 0.70
-        else:
-            result["confidence"] = 0.887
-    except Exception as e:
-        logger.error("vLLM inference failed: %s", e)
+    if _pipe is None:
         result = _fallback(clause_text)
         result["confidence"] = 0.70
+    else:
+        try:
+            prompt = _build_prompt(clause_text)
+            output = _pipe(prompt)[0]["generated_text"]
+            result = _parse(output, prompt)
+            if result is None:
+                result = _fallback(clause_text)
+                result["confidence"] = 0.70
+            else:
+                result["confidence"] = 0.887
+        except Exception as e:
+            logger.error("Inference error: %s", e)
+            result = _fallback(clause_text)
+            result["confidence"] = 0.70
 
     result["wording"] = NEGOTIATION_WORDING.get(result.get("clause_type", ""))
     return result
