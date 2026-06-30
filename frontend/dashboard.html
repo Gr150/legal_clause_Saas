@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claura — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --sidebar-bg:   #12202F;
+  --sidebar-w:    224px;
+  --bg:           #F4F3EF;
+  --surface:      #FFFFFF;
+  --border:       #EAE8E1;
+  --primary:      #C84A1A;
+  --primary-h:    #A83A10;
+  --navy:         #12202F;
+  --muted:        #6B7280;
+  --danger:       #DC2626;
+  --danger-bg:    #FEF2F2;
+  --warning:      #D97706;
+  --warning-bg:   #FFFBEB;
+  --success:      #16A34A;
+  --success-bg:   #F0FDF4;
+  --serif:        'Source Serif 4', Georgia, serif;
+  --sans:         'Inter', system-ui, sans-serif;
+  --mono:         'JetBrains Mono', monospace;
+  --radius:       6px;
+  --radius-lg:    10px;
+}
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--navy);
+  display: flex;
+  min-height: 100vh;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── SIDEBAR ──────────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0;
+  height: 100vh;
+  z-index: 100;
+  overflow-y: auto;
+}
+
+.sidebar-logo {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.sidebar-logo a {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--primary);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+}
+
+.sidebar-user {
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--primary);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.user-info { flex: 1; min-width: 0; }
+.user-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.user-plan {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.04em;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 12px 0;
+  overflow-y: auto;
+}
+
+.nav-section {
+  margin-bottom: 4px;
+}
+
+.nav-section-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  padding: 10px 20px 4px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 20px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.65);
+  cursor: pointer;
+  transition: all 0.15s;
+  border-radius: 0;
+  text-decoration: none;
+  border-left: 2px solid transparent;
+}
+
+.nav-item:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.06);
+}
+
+.nav-item.active {
+  color: #fff;
+  background: rgba(200,74,26,0.18);
+  border-left-color: var(--primary);
+  font-weight: 500;
+}
+
+.nav-icon { font-size: 14px; width: 16px; text-align: center; flex-shrink: 0; }
+
+.nav-badge {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 9px;
+  background: var(--primary);
+  color: #fff;
+  padding: 1px 5px;
+  border-radius: 10px;
+}
+
+.sidebar-footer {
+  padding: 12px 0;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+/* ── MAIN ─────────────────────────────────────────────── */
+.main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── TOPBAR ───────────────────────────────────────────── */
+.topbar {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.topbar-left h1 {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--navy);
+  letter-spacing: -0.01em;
+}
+
+.topbar-left p {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: var(--mono);
+  margin-top: 1px;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-new {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 9px 16px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-new:hover { background: var(--primary-h); }
+
+.btn-notif {
+  width: 34px; height: 34px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  position: relative;
+  transition: border-color 0.15s;
+}
+
+.btn-notif:hover { border-color: var(--navy); }
+
+.notif-dot {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--danger);
+  border: 1.5px solid var(--bg);
+}
+
+/* ── CONTENT ──────────────────────────────────────────── */
+.content {
+  padding: 24px 28px;
+  flex: 1;
+}
+
+/* ── WELCOME BANNER (empty state) ─────────────────────── */
+.welcome-banner {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 36px 24px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.welcome-icon {
+  width: 52px; height: 52px;
+  background: var(--warning-bg);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  margin: 0 auto 16px;
+}
+
+.welcome-banner h2 {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.welcome-banner p {
+  font-size: 13px;
+  color: var(--muted);
+  max-width: 400px;
+  margin: 0 auto 24px;
+  line-height: 1.6;
+}
+
+.welcome-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  max-width: 600px;
+  margin: 0 auto 24px;
+}
+
+.step {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: left;
+}
+
+.step-num {
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.step:nth-child(1) .step-num { background: var(--primary); }
+.step:nth-child(2) .step-num { background: var(--warning); }
+.step:nth-child(3) .step-num { background: var(--success); }
+
+.step h4 {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+
+.step p {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.btn-create {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 11px 24px;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+  letter-spacing: 0.03em;
+}
+
+.btn-create:hover { background: var(--primary-h); }
+
+/* ── STAT CARDS ───────────────────────────────────────── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+
+.stat-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stat-icon { font-size: 12px; }
+
+.stat-value {
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--navy);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-sub {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.stat-health .stat-value { color: var(--success); }
+.health-bar {
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+.health-fill {
+  height: 100%;
+  background: var(--success);
+  border-radius: 2px;
+  width: 100%;
+  transition: width 0.6s ease;
+}
+
+/* ── GRID ─────────────────────────────────────────────── */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.grid-2-1 {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* ── PANEL ────────────────────────────────────────────── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.panel-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.panel-action {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--primary);
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.panel-action:hover { opacity: 0.75; }
+
+.panel-body {
+  padding: 18px;
+}
+
+/* ── CHART (activity) ─────────────────────────────────── */
+.chart-legend {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.legend-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+}
+
+.chart-area {
+  height: 80px;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.bar-group {
+  flex: 1;
+  display: flex;
+  gap: 2px;
+  align-items: flex-end;
+}
+
+.bar {
+  flex: 1;
+  border-radius: 2px 2px 0 0;
+  min-height: 3px;
+  transition: opacity 0.15s;
+}
+
+.bar:hover { opacity: 0.75; }
+.bar-upload { background: #3B82F6; }
+.bar-review { background: var(--primary); }
+
+.chart-labels {
+  display: flex;
+  gap: 6px;
+}
+
+.chart-label {
+  flex: 1;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+/* ── EMPTY STATE ──────────────────────────────────────── */
+.empty-state {
+  padding: 32px 18px;
+  text-align: center;
+}
+
+.empty-icon {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  margin: 0 auto 12px;
+  color: var(--success);
+}
+
+.empty-state h4 {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+
+.empty-state p {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* ── NOTICES ──────────────────────────────────────────── */
+.notice-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.notice-item:last-child { border-bottom: none; }
+
+.notice-risk {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.risk-high   { background: var(--danger); }
+.risk-medium { background: var(--warning); }
+.risk-low    { background: var(--success); }
+
+.notice-content { flex: 1; min-width: 0; }
+
+.notice-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--navy);
+  margin-bottom: 2px;
+}
+
+.notice-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+}
+
+.notice-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.badge-high    { background: var(--danger-bg);  color: var(--danger); }
+.badge-medium  { background: var(--warning-bg); color: var(--warning); }
+.badge-low     { background: var(--success-bg); color: var(--success); }
+
+/* ── DEADLINES ────────────────────────────────────────── */
+.deadline-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.dtab {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 3px 9px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--muted);
+  border: 1px solid transparent;
+  transition: all 0.15s;
+}
+
+.dtab.active {
+  background: var(--bg);
+  border-color: var(--border);
+  color: var(--navy);
+  font-weight: 500;
+}
+
+/* ── RECENT CONTRACTS ─────────────────────────────────── */
+.contract-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.contract-row:last-child { border-bottom: none; }
+.contract-row:hover { background: var(--bg); margin: 0 -18px; padding: 11px 18px; }
+
+.contract-icon {
+  width: 32px; height: 32px;
+  border-radius: 6px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.contract-info { flex: 1; min-width: 0; }
+
+.contract-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--navy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.contract-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+}
+
+.contract-verdict {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.verdict-caution  { background: var(--warning-bg); color: var(--warning); }
+.verdict-safe     { background: var(--success-bg);  color: var(--success); }
+.verdict-danger   { background: var(--danger-bg);   color: var(--danger);  }
+
+/* ── UPLOAD ZONE ──────────────────────────────────────── */
+.upload-zone {
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: var(--bg);
+}
+
+.upload-zone:hover {
+  border-color: var(--primary);
+  background: #FEF6F3;
+}
+
+.upload-zone p {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.upload-zone strong {
+  color: var(--primary);
+}
+
+/* ── MODAL OVERLAY ────────────────────────────────────── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(18,32,47,0.5);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  width: 100%;
+  max-width: 480px;
+  position: relative;
+}
+
+.modal h2 {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+
+.modal p {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px; right: 16px;
+  width: 28px; height: 28px;
+  border: none;
+  background: var(--bg);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--muted);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.modal-close:hover { background: var(--border); }
+
+.modal-field { margin-bottom: 16px; }
+
+.modal-field label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--navy);
+  margin-bottom: 6px;
+}
+
+.modal-field select {
+  width: 100%;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0 12px;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--navy);
+  background: var(--surface);
+  outline: none;
+  cursor: pointer;
+}
+
+.modal-field select:focus { border-color: var(--primary); }
+
+.btn-analyse {
+  width: 100%;
+  height: 44px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background 0.15s;
+}
+
+.btn-analyse:hover { background: var(--primary-h); }
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ──────────────────────────────────────────── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <a href="#">claura.</a>
+  </div>
+
+  <div class="sidebar-user">
+    <div class="user-avatar">GR</div>
+    <div class="user-info">
+      <div class="user-name">Govardhan Reddy</div>
+      <div class="user-plan">FREE TRIAL</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <div class="nav-section-label">Workspace</div>
+      <a class="nav-item active" href="#">
+        <span class="nav-icon">⊞</span> Dashboard
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">📄</span> My Contracts
+        <span class="nav-badge">0</span>
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">⚠</span> Risk Flags
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Analysis</div>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">🔍</span> Contract Review
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">📋</span> NEC4 Checker
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">🏗</span> JCT Checker
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">✏</span> Negotiation Wording
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Account</div>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">🏢</span> Company Profile
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">👥</span> Team
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">💳</span> Billing
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">⚙</span> Settings
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Support</div>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">❓</span> Help Centre
+      </a>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a class="nav-item" href="#">
+      <span class="nav-icon">←</span> Log out
+    </a>
+  </div>
+</aside>
+
+<!-- ── MAIN ────────────────────────────────────────────── -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Dashboard</h1>
+      <p>Welcome back, Govardhan</p>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-notif">
+        🔔
+        <span class="notif-dot"></span>
+      </button>
+      <button class="btn-new" onclick="openModal()">
+        + New Review
+      </button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- WELCOME BANNER (empty state) -->
+    <div class="welcome-banner" id="welcome-banner">
+      <div class="welcome-icon">📄</div>
+      <h2>Welcome to Claura</h2>
+      <p>Upload your NEC4 or JCT subcontract and get a plain English risk assessment in under 2 minutes.</p>
+      <div class="welcome-steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h4>Upload contract</h4>
+          <p>Drag and drop your NEC4 or JCT subcontract PDF</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h4>AI analyses it</h4>
+          <p>We scan every clause for risk, obligations and deviations</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h4>Get plain English verdict</h4>
+          <p>Red, amber, green per clause — plus suggested wording</p>
+        </div>
+      </div>
+      <button class="btn-create" onclick="openModal()">+ Start a Review</button>
+    </div>
+
+    <!-- STAT CARDS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">
+          Total Contracts
+          <span class="stat-icon">📄</span>
+        </div>
+        <div class="stat-value">0</div>
+        <div class="stat-sub">in your portfolio</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">
+          Reviewed
+          <span class="stat-icon">✓</span>
+        </div>
+        <div class="stat-value">0</div>
+        <div class="stat-sub">this month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">
+          Avg Review Time
+          <span class="stat-icon">⏱</span>
+        </div>
+        <div class="stat-value">—</div>
+        <div class="stat-sub">per contract</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">
+          High Risk Flags
+          <span class="stat-icon">⚠</span>
+        </div>
+        <div class="stat-value">0</div>
+        <div class="stat-sub">requiring action</div>
+      </div>
+      <div class="stat-card stat-health">
+        <div class="stat-label">
+          Portfolio Health
+          <span class="stat-icon">💚</span>
+        </div>
+        <div class="stat-value">100</div>
+        <div class="stat-sub">/ 100</div>
+        <div class="health-bar">
+          <div class="health-fill" style="width:100%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 1: Activity + Notices -->
+    <div class="grid-2-1">
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Contract Review Activity</span>
+          <div class="chart-legend">
+            <div class="legend-item">
+              <div class="legend-dot" style="background:#3B82F6"></div>
+              Uploaded
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background:var(--primary)"></div>
+              Reviewed
+            </div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="chart-area">
+            <div class="bar-group"><div class="bar bar-upload" style="height:0%"></div><div class="bar bar-review" style="height:0%"></div></div>
+            <div class="bar-group"><div class="bar bar-upload" style="height:0%"></div><div class="bar bar-review" style="height:0%"></div></div>
+            <div class="bar-group"><div class="bar bar-upload" style="height:0%"></div><div class="bar bar-review" style="height:0%"></div></div>
+            <div class="bar-group"><div class="bar bar-upload" style="height:0%"></div><div class="bar bar-review" style="height:0%"></div></div>
+            <div class="bar-group"><div class="bar bar-upload" style="height:0%"></div><div class="bar bar-review" style="height:0%"></div></div>
+            <div class="bar-group"><div class="bar bar-upload" style="height:0%"></div><div class="bar bar-review" style="height:0%"></div></div>
+          </div>
+          <div class="chart-labels">
+            <div class="chart-label">JAN</div>
+            <div class="chart-label">FEB</div>
+            <div class="chart-label">MAR</div>
+            <div class="chart-label">APR</div>
+            <div class="chart-label">MAY</div>
+            <div class="chart-label">JUN</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Risk Flags</span>
+          <a class="panel-action">View all →</a>
+        </div>
+        <div class="panel-body" style="padding:0 18px">
+          <div class="empty-state">
+            <div class="empty-icon">✓</div>
+            <h4>No risk flags</h4>
+            <p>Upload a contract to start scanning for High Risk clauses</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ROW 2: Contracts Requiring Attention + Recent Reviews -->
+    <div class="grid-2">
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Contracts Requiring Attention</span>
+          <div class="deadline-tabs">
+            <div class="dtab active">Next 7 Days</div>
+            <div class="dtab">Next 30 Days</div>
+          </div>
+        </div>
+        <div class="panel-body" style="padding:0 18px">
+          <div class="empty-state">
+            <div class="empty-icon">✓</div>
+            <h4>All contracts compliant</h4>
+            <p>No High or Medium risk clauses found. Upload a contract to begin.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Recent Contract Reviews</span>
+          <a class="panel-action">View all →</a>
+        </div>
+        <div class="panel-body" style="padding:0 18px">
+          <div class="empty-state">
+            <div class="empty-icon" style="font-size:16px; color:var(--muted)">📄</div>
+            <h4>No contracts reviewed yet</h4>
+            <p>Upload your first NEC4 or JCT contract to get started</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ROW 3: Upload Zone -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Quick Upload</span>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">PDF · Max 50MB · NEC4 or JCT</span>
+      </div>
+      <div class="panel-body">
+        <div class="upload-zone" onclick="openModal()">
+          <div style="font-size:28px;margin-bottom:8px">📁</div>
+          <p><strong>Click to upload</strong> or drag and drop your subcontract here</p>
+          <p style="margin-top:4px;font-size:11px">Supports NEC4 ECC, NEC4 Subcontract, JCT Design and Build, JCT Minor Works</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── MODAL ────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2>New contract review</h2>
+    <p>Upload your subcontract and select the contract type. Results in under 2 minutes.</p>
+
+    <div class="upload-zone" style="margin-bottom:20px">
+      <div style="font-size:24px;margin-bottom:6px">📄</div>
+      <p><strong>Click to upload PDF</strong> or drag and drop</p>
+      <p style="font-size:11px;margin-top:4px">Max 50MB</p>
+    </div>
+
+    <div class="modal-field">
+      <label>Contract type</label>
+      <select>
+        <option>NEC4 Engineering and Construction Subcontract</option>
+        <option>NEC4 Engineering and Construction Contract</option>
+        <option>JCT Design and Build Subcontract</option>
+        <option>JCT Minor Works Contract</option>
+        <option>JCT Standard Building Contract</option>
+        <option>Bespoke / Other</option>
+      </select>
+    </div>
+
+    <div class="modal-field">
+      <label>Contract value (optional)</label>
+      <select>
+        <option>Under £50,000</option>
+        <option>£50,000 – £250,000</option>
+        <option>£250,000 – £1,000,000</option>
+        <option>Over £1,000,000</option>
+        <option>Prefer not to say</option>
+      </select>
+    </div>
+
+    <button class="btn-analyse">Analyse contract →</button>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:8000';
+
+// ── Auth guard ─────────────────────────────────────────────────────
+const token = localStorage.getItem('claura_token');
+if (!token) { window.location.href = '/login.html'; }
+
+function authHeaders() {
+  return { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+}
+
+// ── Personalise sidebar ────────────────────────────────────────────
+const company = localStorage.getItem('claura_company') || 'Your Company';
+const initials = company.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+document.querySelector('.user-avatar').textContent = initials;
+document.querySelector('.user-name').textContent   = company;
+document.querySelector('.topbar-left p').textContent = 'Welcome back, ' + company;
+
+// ── Logout ─────────────────────────────────────────────────────────
+document.querySelector('.sidebar-footer .nav-item').addEventListener('click', e => {
+  e.preventDefault();
+  localStorage.clear();
+  window.location.href = '/login.html';
+});
+
+// ── Modal ──────────────────────────────────────────────────────────
+function openModal() { document.getElementById('modal').classList.add('open'); }
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modal')) {
+    document.getElementById('modal').classList.remove('open');
+  }
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ── Load dashboard data ────────────────────────────────────────────
+async function loadDashboard() {
+  try {
+    const res  = await fetch(API + '/results/', { headers: authHeaders() });
+    if (res.status === 401) { localStorage.clear(); window.location.href = '/login.html'; return; }
+    const data = await res.json();
+    const contracts = data.contracts || [];
+
+    // Stat cards
+    const totalHigh = contracts.reduce((s, c) => s + c.high_risk, 0);
+    const reviewed  = contracts.length;
+    document.querySelectorAll('.stat-value')[0].textContent = reviewed;
+    document.querySelectorAll('.stat-value')[1].textContent = reviewed;
+    document.querySelectorAll('.stat-value')[3].textContent = totalHigh;
+    const health = reviewed === 0 ? 100 : Math.max(0, Math.round(100 - (totalHigh / (reviewed * 5)) * 100));
+    document.querySelectorAll('.stat-value')[4].textContent = health;
+    document.querySelector('.health-fill').style.width = health + '%';
+    document.querySelector('.nav-badge').textContent = reviewed;
+
+    // Hide/show welcome banner
+    if (reviewed > 0) {
+      document.getElementById('welcome-banner').style.display = 'none';
+    }
+
+    // Recent contracts panel
+    const recentPanel = document.querySelectorAll('.panel')[3].querySelector('.panel-body');
+    if (contracts.length > 0) {
+      recentPanel.innerHTML = contracts.slice(0, 5).map(c => {
+        const verdictClass = c.verdict === 'REVIEW BEFORE SIGNING' ? 'verdict-danger'
+                           : c.verdict === 'CAUTION — SEEK ADVICE' ? 'verdict-caution'
+                           : 'verdict-safe';
+        const verdictLabel = c.verdict === 'REVIEW BEFORE SIGNING' ? 'REVIEW'
+                           : c.verdict === 'CAUTION — SEEK ADVICE' ? 'CAUTION'
+                           : 'SAFE';
+        return `
+          <div class="contract-row" onclick="window.location.href='/results.html?id=${c.contract_id}'">
+            <div class="contract-icon">📄</div>
+            <div class="contract-info">
+              <div class="contract-name">${c.filename}</div>
+              <div class="contract-meta">${c.contract_type} · ${c.high_risk}H ${c.medium_risk}M ${c.low_risk}L</div>
+            </div>
+            <div class="contract-verdict ${verdictClass}">${verdictLabel}</div>
+          </div>`;
+      }).join('');
+    }
+
+    // Risk flags panel
+    const flagsPanel = document.querySelectorAll('.panel')[1].querySelector('.panel-body');
+    const highRisk = contracts.filter(c => c.high_risk > 0);
+    if (highRisk.length > 0) {
+      flagsPanel.style.padding = '0 18px';
+      flagsPanel.innerHTML = highRisk.slice(0, 4).map(c => `
+        <div class="notice-item">
+          <div class="notice-risk risk-high"></div>
+          <div class="notice-content">
+            <div class="notice-title">${c.filename}</div>
+            <div class="notice-meta">${c.high_risk} high risk clause${c.high_risk > 1 ? 's' : ''}</div>
+          </div>
+          <div class="notice-badge badge-high">HIGH</div>
+        </div>`).join('');
+    }
+
+  } catch (err) {
+    console.error('Dashboard load failed:', err);
+  }
+}
+
+// ── Upload + Analyse ───────────────────────────────────────────────
+let selectedFile = null;
+
+// Wire drag/drop and click on both upload zones
+document.querySelectorAll('.upload-zone').forEach(zone => {
+  zone.addEventListener('click', () => document.getElementById('file-input').click());
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--primary)'; });
+  zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; });
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.style.borderColor = '';
+    const f = e.dataTransfer.files[0];
+    if (f && f.type === 'application/pdf') { selectedFile = f; setFileSelected(f.name); }
+  });
+});
+
+const fileInput = document.createElement('input');
+fileInput.type = 'file';
+fileInput.id   = 'file-input';
+fileInput.accept = '.pdf';
+fileInput.style.display = 'none';
+document.body.appendChild(fileInput);
+fileInput.addEventListener('change', () => {
+  if (fileInput.files[0]) { selectedFile = fileInput.files[0]; setFileSelected(fileInput.files[0].name); }
+});
+
+function setFileSelected(name) {
+  document.querySelectorAll('.upload-zone').forEach(z => {
+    z.querySelector('p').innerHTML = `<strong>${name}</strong> ready to analyse`;
+  });
+}
+
+document.querySelector('.btn-analyse').addEventListener('click', async () => {
+  if (!selectedFile) { alert('Please select a PDF first.'); return; }
+  const contractType = document.querySelector('.modal select').value;
+  const analyseBtn   = document.querySelector('.btn-analyse');
+
+  analyseBtn.textContent = 'Uploading…';
+  analyseBtn.disabled = true;
+
+  try {
+    // Upload
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    formData.append('contract_type', contractType);
+
+    const upRes  = await fetch(API + '/upload/', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token },
+      body: formData
+    });
+    if (!upRes.ok) { const e = await upRes.json(); throw new Error(e.detail); }
+    const upData = await upRes.json();
+    const contractId = upData.contract_id;
+    const clauseCount = upData.clause_count;
+
+    // Analyse
+    analyseBtn.textContent = `Analysing ${clauseCount} clauses…`;
+    const anRes  = await fetch(API + '/analyse/' + contractId, {
+      method: 'POST',
+      headers: authHeaders()
+    });
+    if (!anRes.ok) { const e = await anRes.json(); throw new Error(e.detail); }
+
+    closeModal();
+    window.location.href = '/results.html?id=' + contractId;
+
+  } catch (err) {
+    alert('Error: ' + err.message);
+    analyseBtn.textContent = 'Analyse contract →';
+    analyseBtn.disabled = false;
+  }
+});
+
+// ── Nav active state ───────────────────────────────────────────────
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', function(e) {
+    e.preventDefault();
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+document.querySelectorAll('.dtab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.dtab').forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// ── Init ───────────────────────────────────────────────────────────
+loadDashboard();
+</script>
+
+</body>
+</html>
