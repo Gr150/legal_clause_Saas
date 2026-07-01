@@ -94,8 +94,10 @@ def load_model():
         BASE_MODEL,
         torch_dtype=torch.bfloat16,
         device_map="auto",
-        trust_remote_code=True
+        trust_remote_code=True,
+        ignore_mismatched_sizes=True
     )
+    base.generation_config.max_length = None
 
     logger.info("Merging LoRA adapters from: %s", ADAPTER_MODEL)
     model = PeftModel.from_pretrained(base, ADAPTER_MODEL)
@@ -105,9 +107,6 @@ def load_model():
         "text-generation",
         model=model,
         tokenizer=tokenizer,
-        max_new_tokens=350,
-        temperature=0.1,
-        do_sample=False,
         return_full_text=True
     )
 
@@ -183,7 +182,7 @@ def classify_clause(clause_text: str) -> dict:
     else:
         try:
             prompt = _build_prompt(clause_text)
-            output = _pipe(prompt)[0]["generated_text"]
+            output = _pipe(prompt, max_new_tokens=350, do_sample=False)[0]["generated_text"]
             result = _parse(output, prompt)
             if result is None:
                 result = _fallback(clause_text)
